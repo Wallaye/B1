@@ -2,37 +2,44 @@
 
 public static class ThreadPool
 {
-    private static volatile int indexFile = 1;
-    public static int CountFiles = 100;
-    public const int CountThreads = 10;
-    private static Thread[] _threads = new Thread[CountThreads];
+    private const int CountFiles = 100;
+    private const int CountThreads = 10;
+    private static readonly Thread[] Threads = new Thread[CountThreads];
 
     public static void InitializeThreads()
     {
         int startingIndex = 1;
         int endingIndex = CountFiles / CountThreads;
-        for (int i = 0; i < _threads.Length; i++)
+        for (int i = 0; i < Threads.Length; i++)
         {
-            if (i != _threads.Length - 1)
+            int start = startingIndex;
+            int end = endingIndex;
+            if (i != Threads.Length - 1)
             {
-                int start = startingIndex;
-                int end = endingIndex;
-                _threads[i] = new Thread(() => FileWorker.GenerateFiles(start, end));
+                Threads[i] = new Thread(() => FileWorker.GenerateFiles(start, end));
                 startingIndex = endingIndex + 1;
                 endingIndex = startingIndex + CountFiles / CountThreads - 1;
             }
             else
             {
-                _threads[i] = new Thread(() => FileWorker.GenerateFiles(startingIndex, CountFiles));
+                Threads[i] = new Thread(() => FileWorker.GenerateFiles(start, CountFiles));
             }
         }
     }
 
     public static void StartGenerating()
     {
-        for (int i = 0; i < _threads.Length; i++)
+        for (int i = 0; i < Threads.Length; i++)
         {
-            _threads[i].Start();
+            Threads[i].Start();
+        }
+    }
+
+    public static void WaitAll()
+    {
+        for (int i = 0; i < Threads.Length; i++)
+        {
+            Threads[i].Join();
         }
     }
 }

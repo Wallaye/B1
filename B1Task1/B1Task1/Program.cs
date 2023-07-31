@@ -14,6 +14,7 @@ namespace B1Task1
             ThreadPool.InitializeThreads();
             stopwatch.Start();
             ThreadPool.StartGenerating();
+            ThreadPool.WaitAll(); 
             stopwatch.Stop();
             Console.WriteLine(stopwatch.ElapsedMilliseconds);
             Console.ReadLine();
