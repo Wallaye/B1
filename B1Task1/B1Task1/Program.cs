@@ -1,17 +1,21 @@
 ﻿using System;
+using System.Diagnostics;
 using B1Task1.Data;
 
 namespace B1Task1
 {
     internal class Program
     {
+       //private static volatile int indexOfFile = 1;
         static void Main(string[] args)
         {
-            IGenerator generator = new Generator();
-            for (int i = 0; i < 1000; i++)
-            {
-                Console.WriteLine(generator.GenerateDate());
-            }
+            
+            Stopwatch stopwatch = new Stopwatch();
+            ThreadPool.InitializeThreads();
+            stopwatch.Start();
+            ThreadPool.StartGenerating();
+            stopwatch.Stop();
+            Console.WriteLine(stopwatch.ElapsedMilliseconds);
             Console.ReadLine();
         }
     }

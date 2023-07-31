@@ -2,7 +2,7 @@
 
 namespace B1Task1.Data;
 
-public interface IGenerator
+public interface IDataGenerator
 {
     public string GenerateRussianString();
     public string GenerateEnglishString();

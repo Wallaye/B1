@@ -2,7 +2,7 @@
 
 namespace B1Task1.Data
 {
-    internal class Generator : IGenerator
+    internal class DataGenerator : IDataGenerator
     {
         private Random _random = new();
         private const string RussianAlphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
