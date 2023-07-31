@@ -1,18 +1,20 @@
-﻿using System;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 
-namespace B1Task1
+namespace B1Task1.Data
 {
     internal class Generator : IGenerator
     {
         private Random _random = new();
-        private readonly string _russianAlphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
-        private readonly string _englishAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private const string RussianAlphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+        private const string EnglishAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private const int DaysInFiveYears = 365 * 5;
         
         public DateOnly GenerateDate()
         {
-            throw new NotImplementedException();
+            var now = DateOnly.FromDateTime(DateTime.Now.AddYears(-5));
+            var days = _random.Next(0, DaysInFiveYears);
+            var result = now.AddDays(days);
+            return result;
         }
         
         public string GenerateEnglishString()
@@ -20,7 +22,7 @@ namespace B1Task1
             StringBuilder sb = new StringBuilder(10);
             for (byte i = 0; i < 10;i++)
             {
-                sb.Append(_englishAlphabet.ElementAt(_random.Next(_englishAlphabet.Length)));
+                sb.Append(EnglishAlphabet.ElementAt(_random.Next(EnglishAlphabet.Length)));
             }
             return sb.ToString();
         }
@@ -30,7 +32,7 @@ namespace B1Task1
             StringBuilder sb = new StringBuilder(10);
             for (byte i = 0; i < 10;i++)
             {
-                sb.Append(_russianAlphabet.ElementAt(_random.Next(_russianAlphabet.Length)));
+                sb.Append(RussianAlphabet.ElementAt(_random.Next(RussianAlphabet.Length)));
             }
             return sb.ToString();
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using B1Task1.Data;
 
 namespace B1Task1
 {
@@ -7,10 +8,10 @@ namespace B1Task1
         static void Main(string[] args)
         {
             IGenerator generator = new Generator();
-            Console.WriteLine(generator.GenerateDouble());
-            Console.WriteLine(generator.GenerateInt());
-            Console.WriteLine(generator.GenerateEnglishString());
-            Console.WriteLine(generator.GenerateRussianString());
+            for (int i = 0; i < 1000; i++)
+            {
+                Console.WriteLine(generator.GenerateDate());
+            }
             Console.ReadLine();
         }
     }
