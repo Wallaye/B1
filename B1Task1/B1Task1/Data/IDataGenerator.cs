@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace B1Task1.Data;
+namespace B1Task1.File.Data;
 
 public interface IDataGenerator
 {

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace B1Task1.Data
+namespace B1Task1.File.Data
 {
     internal class DataGenerator : IDataGenerator
     {

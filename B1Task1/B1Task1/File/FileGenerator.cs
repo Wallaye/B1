@@ -1,20 +1,20 @@
 ﻿using System.Text;
-using B1Task1.Data;
+using B1Task1.File.Data;
 
-namespace B1Task1;
+namespace B1Task1.File;
 
-public static class FileWorker
+public static class FileGenerator
 {
     public static int RowsToGenerate = 100000;
     public static int RowsInOneTime = 10;
     public static IDataGenerator DataGenerator = new DataGenerator();
     
-    public static void GenerateFile(object? index)
+    public static void GenerateFile(int index)
     {
-        string filename = $"..\\..\\..\\files\\{(int)index}.txt";
+        string filename = $"..\\..\\..\\files\\{index}.txt";
         int j = 0;
         var sb = new StringBuilder();
-        using (var file = File.Create(filename))
+        using (var file = System.IO.File.Create(filename))
         {
             using (var sw = new StreamWriter(file))
             {
@@ -36,21 +36,11 @@ public static class FileWorker
         }
     }
 
-    public static void GenerateFiles(object? startingIndex, object? endingIndex)
+    public static void GenerateFiles(int startingIndex, int endingIndex)
     {
-        for (int i = (int)startingIndex; i <= (int)endingIndex; i++)
+        for (int i = startingIndex; i <= endingIndex; i++)
         {
             GenerateFile(i);
         }
-    }
-
-    public static bool SetRowsInfo(int rowsToGenerate, int rowsInOneTime)
-    {
-        if (rowsInOneTime >= rowsToGenerate)
-        {
-            rowsInOneTime = rowsToGenerate;
-            return true;
-        }
-        return rowsToGenerate % rowsInOneTime != 0;
     }
 }

@@ -1,12 +1,19 @@
-﻿namespace B1Task1;
+﻿using System.Text;
+using System.Xml.Schema;
+
+namespace B1Task1.File;
 
 public static class ThreadPool
 {
     private const int CountFiles = 100;
     private const int CountThreads = 10;
     private static readonly Thread[] Threads = new Thread[CountThreads];
+    private static StreamWriter _streamWriter = StreamWriter.Null;
+    private static FileStream? _fileStream = null;
 
-    public static void InitializeThreads()
+    public static long DeletedRows = 0;
+
+    public static void InitializeThreads(bool generating = true, string? substring = null)
     {
         int startingIndex = 1;
         int endingIndex = CountFiles / CountThreads;
@@ -16,18 +23,93 @@ public static class ThreadPool
             int end = endingIndex;
             if (i != Threads.Length - 1)
             {
-                Threads[i] = new Thread(() => FileWorker.GenerateFiles(start, end));
+                if (generating)
+                {
+                    Threads[i] = new Thread(() => FileGenerator.GenerateFiles(start, end));
+                }
+                else
+                {
+                    Threads[i] = new Thread(() => ReadFilesAndDeleteSubstring(start, end, substring));
+                }
                 startingIndex = endingIndex + 1;
                 endingIndex = startingIndex + CountFiles / CountThreads - 1;
             }
             else
             {
-                Threads[i] = new Thread(() => FileWorker.GenerateFiles(start, CountFiles));
+                if (generating)
+                {
+                    Threads[i] = new Thread(() => FileGenerator.GenerateFiles(start, CountFiles));
+                }
+                else
+                {
+                    Threads[i] = new Thread(() => FileGenerator.GenerateFiles(start, end));
+                }
             }
         }
     }
+    
+    public static void ReadFilesAndDeleteSubstring(int start, int end, string? substring)
+    {
+        if (_streamWriter == StreamWriter.Null)
+        {
+            lock (_streamWriter)
+            {
+                if (_fileStream == null)
+                {
+                    _fileStream = new FileStream("..\\..\\..\\result.txt",
+                        FileMode.Create, FileAccess.Write, FileShare.Write);
+                }
+                if (_streamWriter == StreamWriter.Null)
+                {
+                    _streamWriter = new StreamWriter(_fileStream);
+                }
+            }
+        }
+        for (int i = start; i <= end; i++)
+        {
+            ReadFileAndDeleteSubstring(i, substring);
+        }
+    }
+    
+    public static void ReadFileAndDeleteSubstring(int index, string? substring)
+    {
+        string filename = $"..\\..\\..\\files\\{index}.txt";
+        using var sr = new StreamReader(filename);
+        Task<string>? getFileContentTask = null;
+        var sb = new StringBuilder();
+        int deletedRows = 0;
 
-    public static void StartGenerating()
+        if (substring != null && !string.IsNullOrWhiteSpace(substring))
+        {
+            string? line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                if (!line.Contains(substring) && !string.IsNullOrWhiteSpace(line))
+                {
+                    sb.AppendLine(line);
+                }
+                else
+                {
+                    deletedRows++;
+                }
+            }
+            Interlocked.Add(ref DeletedRows, deletedRows);
+        }
+        else
+        {
+            getFileContentTask = sr.ReadToEndAsync();
+        }
+        lock (_streamWriter)
+        {
+            if (getFileContentTask != null)
+            {
+                sb.Append(getFileContentTask.GetAwaiter().GetResult());
+            }
+            _streamWriter.Write(sb.ToString());
+        }
+    }
+    
+    public static void StartAll()
     {
         for (int i = 0; i < Threads.Length; i++)
         {
@@ -40,6 +122,22 @@ public static class ThreadPool
         for (int i = 0; i < Threads.Length; i++)
         {
             Threads[i].Join();
+        }
+        DisposeStreams();
+    }
+
+    public static void DisposeStreams()
+    {
+        if (_streamWriter != StreamWriter.Null)
+        {
+            _streamWriter.Close();
+            _streamWriter = StreamWriter.Null;
+        }
+
+        if (_fileStream != null) 
+        {
+            _fileStream.Close();
+            _fileStream = null;
         }
     }
 }

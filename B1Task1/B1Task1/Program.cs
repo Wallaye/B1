@@ -1,23 +1,21 @@
-﻿using System;
-using System.Diagnostics;
-using B1Task1.Data;
+﻿using System.Diagnostics;
 
-namespace B1Task1
+namespace B1Task1.File
 {
     internal class Program
     {
-       //private static volatile int indexOfFile = 1;
         static void Main(string[] args)
         {
-            
-            Stopwatch stopwatch = new Stopwatch();
-            ThreadPool.InitializeThreads();
-            stopwatch.Start();
-            ThreadPool.StartGenerating();
-            ThreadPool.WaitAll(); 
-            stopwatch.Stop();
-            Console.WriteLine(stopwatch.ElapsedMilliseconds);
+            ThreadPool.InitializeThreads(false, "e");
+            var sw = new Stopwatch();
+            sw.Start();
+            ThreadPool.StartAll();
+            ThreadPool.WaitAll();
+            sw.Stop();
+            Console.WriteLine($"deleted rows ${ThreadPool.DeletedRows}");
+            Console.WriteLine("Ended");
+            Console.WriteLine(sw.ElapsedMilliseconds);
             Console.ReadLine();
         }
     }
-}
+} 
