@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using B1Task1.Extensions;
 using B1Task1.SQL;
 using Microsoft.Data.SqlClient;
 
@@ -57,8 +58,20 @@ namespace B1Task1
                         {
                             try
                             {
-                                DatabaseSQL.ConnectToDb();
-                                DatabaseSQL.CreateDb();
+                                Console.WriteLine("Choose files to import(delimiter - space or enter range in format *-*(e.g. 1-5 12 43 50-55))");
+                                string? str = Console.ReadLine();
+                                if (!string.IsNullOrWhiteSpace(str))
+                                {
+                                    var indexes = str.GetIndexes(1, 100);
+                                    foreach (var i in indexes)
+                                    {
+                                        Console.WriteLine(i);
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Enter the valid string");
+                                }
                             }
                             catch (SqlException e)
                             {
