@@ -1,38 +1,64 @@
 ﻿using System.Text;
-using B1Task1.File.Data;
+using B1Task1.Data;
 
 namespace B1Task1.File;
 
 public static class FileGenerator
 {
     public static int RowsToGenerate = 100000;
-    public static int RowsInOneTime = 10;
+
+    private static int _rowsInOneTime = 10;
+    public static int RowsInOneTime
+    {
+        get => _rowsInOneTime;
+        set {
+            if (value < 0)
+            {
+                _rowsInOneTime = 1;
+            }
+            else if (value > RowsToGenerate)
+            {
+                _rowsInOneTime = RowsToGenerate;
+            }
+            else
+            {
+                _rowsInOneTime = value;
+            }
+        }
+    }
     public static IDataGenerator DataGenerator = new DataGenerator();
     
     public static void GenerateFile(int index)
     {
-        string filename = $"..\\..\\..\\files\\{index}.txt";
-        int j = 0;
-        var sb = new StringBuilder();
-        using (var file = System.IO.File.Create(filename))
+        try
         {
-            using (var sw = new StreamWriter(file))
+            string filename = $"..\\..\\..\\files\\{index}.txt";
+            int j = 0;
+            var sb = new StringBuilder();
+            using (var file = System.IO.File.Create(filename))
             {
-                for (int i = 0; i < RowsToGenerate / RowsInOneTime; i++)
+                using (var sw = new StreamWriter(file))
                 {
-                    sb.Clear();
-                    for (j = 0; j < RowsInOneTime; j++)
+                    for (int i = 0; i < RowsToGenerate / _rowsInOneTime; i++)
                     {
-                        var date = DataGenerator.GenerateDate();
-                        var englishString = DataGenerator.GenerateEnglishString();
-                        var russianString = DataGenerator.GenerateRussianString();
-                        var intNum = DataGenerator.GenerateInt();
-                        var floatNum = DataGenerator.GenerateDouble();
-                        sb.Append($"{date}||{englishString}||{russianString}||{intNum}||{floatNum}\n");
+                        sb.Clear();
+                        for (j = 0; j < _rowsInOneTime; j++)
+                        {
+                            var date = DataGenerator.GenerateDate();
+                            var englishString = DataGenerator.GenerateEnglishString();
+                            var russianString = DataGenerator.GenerateRussianString();
+                            var intNum = DataGenerator.GenerateInt();
+                            var floatNum = DataGenerator.GenerateDouble();
+                            sb.Append($"{date}||{englishString}||{russianString}||{intNum}||{floatNum}\n");
+                        }
+                        sw.Write(sb.ToString());
                     }
-                    sw.Write(sb.ToString());
                 }
             }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
         }
     }
 

@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using System.Xml.Schema;
+using B1Task1.File;
 
-namespace B1Task1.File;
+namespace B1Task1;
 
 public static class ThreadPool
 {
@@ -50,63 +50,78 @@ public static class ThreadPool
     
     public static void ReadFilesAndDeleteSubstring(int start, int end, string? substring)
     {
-        if (_streamWriter == StreamWriter.Null)
+        try
         {
-            lock (_streamWriter)
+            if (_streamWriter == StreamWriter.Null)
             {
-                if (_fileStream == null)
+                lock (_streamWriter)
                 {
-                    _fileStream = new FileStream("..\\..\\..\\result.txt",
-                        FileMode.Create, FileAccess.Write, FileShare.Write);
-                }
-                if (_streamWriter == StreamWriter.Null)
-                {
-                    _streamWriter = new StreamWriter(_fileStream);
+                    if (_fileStream == null)
+                    {
+                        _fileStream = new FileStream("..\\..\\..\\result.txt",
+                            FileMode.Create, FileAccess.Write, FileShare.Write);
+                    }
+                    if (_streamWriter == StreamWriter.Null)
+                    {
+                        _streamWriter = new StreamWriter(_fileStream);
+                    }
                 }
             }
+            for (int i = start; i <= end; i++)
+            {
+                ReadFileAndDeleteSubstring(i, substring);
+            }
         }
-        for (int i = start; i <= end; i++)
+        catch (Exception e)
         {
-            ReadFileAndDeleteSubstring(i, substring);
+            Console.WriteLine(e.Message);
         }
     }
     
     public static void ReadFileAndDeleteSubstring(int index, string? substring)
     {
         string filename = $"..\\..\\..\\files\\{index}.txt";
-        using var sr = new StreamReader(filename);
         Task<string>? getFileContentTask = null;
         var sb = new StringBuilder();
         int deletedRows = 0;
+        try
+        {
+            using var sr = new StreamReader(filename);
 
-        if (substring != null && !string.IsNullOrWhiteSpace(substring))
-        {
-            string? line;
-            while ((line = sr.ReadLine()) != null)
+            if (!string.IsNullOrWhiteSpace(substring))
             {
-                if (!line.Contains(substring) && !string.IsNullOrWhiteSpace(line))
+                string? line;
+                while ((line = sr.ReadLine()) != null)
                 {
-                    sb.AppendLine(line);
+                    if (!line.Contains(substring) && !string.IsNullOrWhiteSpace(line))
+                    {
+                        sb.AppendLine(line);
+                    }
+                    else
+                    {
+                        deletedRows++;
+                    }
                 }
-                else
-                {
-                    deletedRows++;
-                }
+                Interlocked.Add(ref DeletedRows, deletedRows);
             }
-            Interlocked.Add(ref DeletedRows, deletedRows);
-        }
-        else
-        {
-            getFileContentTask = sr.ReadToEndAsync();
-        }
-        lock (_streamWriter)
-        {
-            if (getFileContentTask != null)
+            else
             {
-                sb.Append(getFileContentTask.GetAwaiter().GetResult());
+                getFileContentTask = sr.ReadToEndAsync();
             }
-            _streamWriter.Write(sb.ToString());
+            lock (_streamWriter)
+            {
+                if (getFileContentTask != null)
+                {
+                    sb.Append(getFileContentTask.GetAwaiter().GetResult());
+                }
+                _streamWriter.Write(sb.ToString());
+            }
         }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        
     }
     
     public static void StartAll()
@@ -128,16 +143,26 @@ public static class ThreadPool
 
     public static void DisposeStreams()
     {
-        if (_streamWriter != StreamWriter.Null)
+        try
         {
-            _streamWriter.Close();
-            _streamWriter = StreamWriter.Null;
-        }
+            if (_streamWriter != StreamWriter.Null)
+            {
+                _streamWriter.Close();
+                _streamWriter = StreamWriter.Null;
+            }
 
-        if (_fileStream != null) 
-        {
-            _fileStream.Close();
-            _fileStream = null;
+            if (_fileStream != null) 
+            {
+                _fileStream.Close();
+                _fileStream = null;
+            }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        
     }
 }

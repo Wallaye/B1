@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace B1Task1.File.Data
+namespace B1Task1.Data
 {
     internal class DataGenerator : IDataGenerator
     {
@@ -39,7 +39,7 @@ namespace B1Task1.File.Data
 
         public int GenerateInt()
         {
-            return _random.Next();
+            return 2 * _random.Next(1, 50_000_000);
         }
 
         public double GenerateDouble()
