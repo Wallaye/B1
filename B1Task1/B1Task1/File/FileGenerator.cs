@@ -28,11 +28,11 @@ public static class FileGenerator
     }
     public static IDataGenerator DataGenerator = new DataGenerator();
     
-    public static void GenerateFile(int index)
+    private static void GenerateFile(int index)
     {
         try
         {
-            string filename = $"..\\..\\..\\files\\{index}.txt";
+            string filename = $".\\files\\{index}.txt";
             int j = 0;
             var sb = new StringBuilder();
             using (var file = System.IO.File.Create(filename))

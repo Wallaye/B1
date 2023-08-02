@@ -48,7 +48,7 @@ public static class ThreadPool
         }
     }
     
-    public static void ReadFilesAndDeleteSubstring(int start, int end, string? substring)
+    private static void ReadFilesAndDeleteSubstring(int start, int end, string? substring)
     {
         try
         {
@@ -58,7 +58,7 @@ public static class ThreadPool
                 {
                     if (_fileStream == null)
                     {
-                        _fileStream = new FileStream("..\\..\\..\\result.txt",
+                        _fileStream = new FileStream(".\\result\\result.txt",
                             FileMode.Create, FileAccess.Write, FileShare.Write);
                     }
                     if (_streamWriter == StreamWriter.Null)
@@ -78,9 +78,9 @@ public static class ThreadPool
         }
     }
     
-    public static void ReadFileAndDeleteSubstring(int index, string? substring)
+    private static void ReadFileAndDeleteSubstring(int index, string? substring)
     {
-        string filename = $"..\\..\\..\\files\\{index}.txt";
+        string filename = $".\\files\\{index}.txt";
         Task<string>? getFileContentTask = null;
         var sb = new StringBuilder();
         int deletedRows = 0;
@@ -141,7 +141,7 @@ public static class ThreadPool
         DisposeStreams();
     }
 
-    public static void DisposeStreams()
+    private static void DisposeStreams()
     {
         try
         {

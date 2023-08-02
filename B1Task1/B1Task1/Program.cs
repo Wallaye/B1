@@ -9,8 +9,15 @@ namespace B1Task1
     {
         static void Main(string[] args)
         {
+            if (!Directory.Exists(".\\files"))
+            {
+                Directory.CreateDirectory(".\\files");
+            }
+            if (!Directory.Exists(".\\result"))
+            {
+                Directory.CreateDirectory(".\\result");
+            }
             Menu();
-            Console.ReadLine();
         }
         
         static void Menu()
