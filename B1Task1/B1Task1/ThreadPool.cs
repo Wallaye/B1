@@ -5,31 +5,32 @@ namespace B1Task1;
 
 public static class ThreadPool
 {
-    private const int CountFiles = 100;
-    private const int CountThreads = 10;
-    private static readonly Thread[] Threads = new Thread[CountThreads];
+    public static int CountFiles = 100;
+    public static int CountThreads = 10;
+    private static Thread[]? _threads;
     private static StreamWriter _streamWriter = StreamWriter.Null;
-    private static FileStream? _fileStream = null;
-
-    public static long DeletedRows = 0;
+    private static FileStream? _fileStream;
+ 
+    public static long DeletedRows    = 0;
 
     public static void InitializeThreads(bool generating = true, string? substring = null)
     {
+        _threads = new Thread[CountThreads];
         int startingIndex = 1;
         int endingIndex = CountFiles / CountThreads;
-        for (int i = 0; i < Threads.Length; i++)
+        for (int i = 0; i < _threads.Length; i++)
         {
             int start = startingIndex;
             int end = endingIndex;
-            if (i != Threads.Length - 1)
+            if (i != _threads.Length - 1)
             {
                 if (generating)
                 {
-                    Threads[i] = new Thread(() => FileGenerator.GenerateFiles(start, end));
+                    _threads[i] = new Thread(() => FileGenerator.GenerateFiles(start, end));
                 }
                 else
                 {
-                    Threads[i] = new Thread(() => ReadFilesAndDeleteSubstring(start, end, substring));
+                    _threads[i] = new Thread(() => ReadFilesAndDeleteSubstring(start, end, substring));
                 }
                 startingIndex = endingIndex + 1;
                 endingIndex = startingIndex + CountFiles / CountThreads - 1;
@@ -38,11 +39,11 @@ public static class ThreadPool
             {
                 if (generating)
                 {
-                    Threads[i] = new Thread(() => FileGenerator.GenerateFiles(start, CountFiles));
+                    _threads[i] = new Thread(() => FileGenerator.GenerateFiles(start, CountFiles));
                 }
                 else
                 {
-                    Threads[i] = new Thread(() => FileGenerator.GenerateFiles(start, end));
+                    _threads[i] = new Thread(() => ReadFilesAndDeleteSubstring(start, CountFiles, substring));
                 }
             }
         }
@@ -126,17 +127,17 @@ public static class ThreadPool
     
     public static void StartAll()
     {
-        for (int i = 0; i < Threads.Length; i++)
+        for (int i = 0; i < _threads.Length; i++)
         {
-            Threads[i].Start();
+            _threads[i].Start();
         }
     }
 
     public static void WaitAll()
     {
-        for (int i = 0; i < Threads.Length; i++)
+        for (int i = 0; i < _threads.Length; i++)
         {
-            Threads[i].Join();
+            _threads[i].Join();
         }
         DisposeStreams();
     }
@@ -164,5 +165,13 @@ public static class ThreadPool
             Console.WriteLine(e.Message);
         }
         
+    }
+
+    public static void Reset()
+    {
+        _threads = null;
+        CountFiles = 100;
+        CountThreads = 10;
+        DeletedRows = 0;
     }
 }

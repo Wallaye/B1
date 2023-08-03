@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using B1Task1.Extensions;
+using B1Task1.Models;
 using B1Task1.SQL;
 using Microsoft.Data.SqlClient;
 
@@ -70,9 +71,9 @@ namespace B1Task1
                                 if (!string.IsNullOrWhiteSpace(str))
                                 {
                                     var indexes = str.GetIndexes(1, 100);
-                                    foreach (var i in indexes)
+                                    if (indexes?.Count() != 0)
                                     {
-                                        Console.WriteLine(i);
+                                        
                                     }
                                 }
                                 else
@@ -82,7 +83,7 @@ namespace B1Task1
                             }
                             catch (SqlException e)
                             {
-                                Console.WriteLine("DB" + e.Message);
+                                Console.WriteLine("DB exc: " + e.Message);
                             }
 
                             break;
@@ -101,7 +102,5 @@ namespace B1Task1
                 }
             }
         }
-        
     }
-    
 } 
