@@ -67,7 +67,7 @@ namespace B1Task1
                             try
                             {
                                 Console.WriteLine(
-                                    "Choose files to import(delimiter - space or enter range in format *-*(e.g. 1-5 12 43 50-55))");
+                                    "Choose files to import(delimiter space or enter range in format *-*(e.g. 1-5 12 43 50-55))");
                                 string? str = Console.ReadLine();
                                 sw.Start();
                                 if (!string.IsNullOrWhiteSpace(str))
@@ -84,10 +84,7 @@ namespace B1Task1
                                                 $"{ThreadPool.ImportedRows}/{ThreadPool.AllRows}(remaining: {ThreadPool.AllRows - ThreadPool.ImportedRows})\r");
                                             Thread.Sleep(200);
                                         }
-
                                         ThreadPool.WaitAll();
-                                        //ThreadPool.ImportFilesInDb(indexes.ToArray());
-                                        //TableService.Save();
                                         sw.Stop();
                                         Console.WriteLine($"Importing {ThreadPool.ImportedRows} finished in {sw.ElapsedMilliseconds} ms");
                                     }
@@ -96,16 +93,11 @@ namespace B1Task1
                                 {
                                     Console.WriteLine("Enter the valid string");
                                 }
-
                                 sw.Stop();
                             }
                             catch (SqlException e)
                             {
                                 Console.WriteLine("DB exc: " + e.Message);
-                            }
-                            catch (AggregateException e)
-                            {
-                                Console.WriteLine(e.InnerException?.Message);
                             }
 
                             break;
