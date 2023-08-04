@@ -49,7 +49,7 @@ public static class FileGenerator
                             var russianString = DataGenerator.GenerateRussianString();
                             var intNum = DataGenerator.GenerateInt();
                             var floatNum = DataGenerator.GenerateDouble();
-                            sb.Append($"{date}||{englishString}||{russianString}||{intNum}||{floatNum}\n");
+                            sb.Append($"{date}||{englishString}||{russianString}||{intNum}||{floatNum}||\n");
                         }
                         sw.Write(sb.ToString());
                     }

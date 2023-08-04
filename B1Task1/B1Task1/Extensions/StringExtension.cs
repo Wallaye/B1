@@ -10,7 +10,7 @@ public static class StringExtension
         {
             if (!value.Contains('-'))
             {
-                if (int.TryParse(value, out int val) && val < maxNumber && val > minNumber)
+                if (int.TryParse(value, out int val) && val <= maxNumber && val >= minNumber)
                 {
                     result.Add(val);
                 }

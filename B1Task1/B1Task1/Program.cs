@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using B1Task1.Extensions;
 using B1Task1.Models;
-using B1Task1.SQL;
+using B1Task1.Services;
 using Microsoft.Data.SqlClient;
 
 namespace B1Task1
@@ -14,13 +14,15 @@ namespace B1Task1
             {
                 Directory.CreateDirectory(".\\files");
             }
+
             if (!Directory.Exists(".\\result"))
             {
                 Directory.CreateDirectory(".\\result");
             }
+
             Menu();
         }
-        
+
         static void Menu()
         {
             bool exit = false;
@@ -40,12 +42,11 @@ namespace B1Task1
                         case 1:
                         {
                             sw.Start();
-                            ThreadPool.InitializeThreads();
+                            ThreadPool.InitializeThreads(Operation.GenerateFiles);
                             ThreadPool.StartAll();
                             ThreadPool.WaitAll();
                             sw.Stop();
                             Console.WriteLine($"Generating finished in {sw.ElapsedMilliseconds}ms");
-                            sw.Reset();
                             break;
                         }
                         case 2:
@@ -53,37 +54,58 @@ namespace B1Task1
                             Console.WriteLine("Enter the substring to delete");
                             string? substring = Console.ReadLine();
                             sw.Start();
-                            ThreadPool.InitializeThreads(false, substring);
+                            ThreadPool.InitializeThreads(Operation.MergeFiles, substring);
                             ThreadPool.StartAll();
                             ThreadPool.WaitAll();
                             sw.Stop();
                             Console.WriteLine($"Merging finished in {sw.ElapsedMilliseconds}ms " +
                                               $"and deleted {ThreadPool.DeletedRows} rows");
-                            sw.Reset();
                             break;
                         }
                         case 3:
                         {
                             try
                             {
-                                Console.WriteLine("Choose files to import(delimiter - space or enter range in format *-*(e.g. 1-5 12 43 50-55))");
+                                Console.WriteLine(
+                                    "Choose files to import(delimiter - space or enter range in format *-*(e.g. 1-5 12 43 50-55))");
                                 string? str = Console.ReadLine();
+                                sw.Start();
                                 if (!string.IsNullOrWhiteSpace(str))
                                 {
                                     var indexes = str.GetIndexes(1, 100);
                                     if (indexes?.Count() != 0)
                                     {
-                                        
+                                        ThreadPool.InitializeThreads(Operation.ImportFiles, indexes: indexes.ToArray());
+                                        ThreadPool.StartAll();
+                                        while (ThreadPool.ImportedRows < ThreadPool.AllRows ||
+                                               ThreadPool.AllRows == 0)
+                                        {
+                                            Console.Write(
+                                                $"{ThreadPool.ImportedRows}/{ThreadPool.AllRows}(remaining: {ThreadPool.AllRows - ThreadPool.ImportedRows})\r");
+                                            Thread.Sleep(200);
+                                        }
+
+                                        ThreadPool.WaitAll();
+                                        //ThreadPool.ImportFilesInDb(indexes.ToArray());
+                                        //TableService.Save();
+                                        sw.Stop();
+                                        Console.WriteLine($"Importing {ThreadPool.ImportedRows} finished in {sw.ElapsedMilliseconds} ms");
                                     }
                                 }
                                 else
                                 {
                                     Console.WriteLine("Enter the valid string");
                                 }
+
+                                sw.Stop();
                             }
                             catch (SqlException e)
                             {
                                 Console.WriteLine("DB exc: " + e.Message);
+                            }
+                            catch (AggregateException e)
+                            {
+                                Console.WriteLine(e.InnerException?.Message);
                             }
 
                             break;
@@ -94,13 +116,17 @@ namespace B1Task1
                             break;
                         }
                     }
-
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
                 }
+                finally
+                {
+                    sw.Reset();
+                    ThreadPool.Reset();
+                }
             }
         }
     }
-} 
+}
