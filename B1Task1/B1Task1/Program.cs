@@ -39,16 +39,18 @@ namespace B1Task1
                     Int32.TryParse(Console.ReadLine(), out choice);
                     switch (choice)
                     {
+                        //Generate files
                         case 1:
                         {
                             sw.Start();
                             ThreadPool.InitializeThreads(Operation.GenerateFiles);
                             ThreadPool.StartAll();
-                            ThreadPool.WaitAll();
+                            ThreadPool.WaitAllAndDisposeStreams();
                             sw.Stop();
                             Console.WriteLine($"Generating finished in {sw.ElapsedMilliseconds}ms");
                             break;
                         }
+                        //Merge files with deleting substring
                         case 2:
                         {
                             Console.WriteLine("Enter the substring to delete");
@@ -56,12 +58,13 @@ namespace B1Task1
                             sw.Start();
                             ThreadPool.InitializeThreads(Operation.MergeFiles, substring);
                             ThreadPool.StartAll();
-                            ThreadPool.WaitAll();
+                            ThreadPool.WaitAllAndDisposeStreams();
                             sw.Stop();
                             Console.WriteLine($"Merging finished in {sw.ElapsedMilliseconds}ms " +
                                               $"and deleted {ThreadPool.DeletedRows} rows");
                             break;
                         }
+                        //Importing files in db.
                         case 3:
                         {
                             try
@@ -77,6 +80,7 @@ namespace B1Task1
                                     {
                                         ThreadPool.InitializeThreads(Operation.ImportFiles, indexes: indexes.ToArray());
                                         ThreadPool.StartAll();
+                                        //output of process
                                         while (ThreadPool.ImportedRows < ThreadPool.AllRows ||
                                                ThreadPool.AllRows == 0)
                                         {
@@ -84,7 +88,7 @@ namespace B1Task1
                                                 $"{ThreadPool.ImportedRows}/{ThreadPool.AllRows}(remaining: {ThreadPool.AllRows - ThreadPool.ImportedRows})\r");
                                             Thread.Sleep(200);
                                         }
-                                        ThreadPool.WaitAll();
+                                        ThreadPool.WaitAllAndDisposeStreams();
                                         sw.Stop();
                                         Console.WriteLine($"Importing {ThreadPool.ImportedRows} finished in {sw.ElapsedMilliseconds} ms");
                                     }
@@ -102,6 +106,7 @@ namespace B1Task1
 
                             break;
                         }
+                        //exiting app
                         case 4:
                         {
                             exit = true;

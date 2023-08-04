@@ -2,6 +2,9 @@
 
 namespace B1Task1.Data
 {
+    /// <summary>
+    /// Data generator.
+    /// </summary>
     internal class DataGenerator : IDataGenerator
     {
         private Random _random = new();

@@ -3,11 +3,17 @@ using B1Task1.Data;
 
 namespace B1Task1.File;
 
+/// <summary>
+/// File generator for task1
+/// </summary>
 public static class FileGenerator
 {
     public static int RowsToGenerate = 100000;
-
+    
     private static int _rowsInOneTime = 10;
+    /// <summary>
+    /// Defines how many rows thread should process before writing to file.
+    /// </summary>
     public static int RowsInOneTime
     {
         get => _rowsInOneTime;

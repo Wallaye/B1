@@ -1,5 +1,8 @@
 ﻿namespace B1Task1.Models;
 
+/// <summary>
+/// Model for Database
+/// </summary>
 public class Table
 {
     public long Id { get; set; }

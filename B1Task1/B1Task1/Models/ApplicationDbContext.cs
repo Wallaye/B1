@@ -8,7 +8,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Table> Tables { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer(@"Data Source=DESKTOP-BF189JB;Initial Catalog=B1;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False");
+        optionsBuilder.UseSqlServer(@"Data Source=DESKTOP-UMTEDEV;Initial Catalog=B1;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False");
     }
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {

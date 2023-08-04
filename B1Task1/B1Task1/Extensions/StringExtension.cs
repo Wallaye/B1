@@ -2,6 +2,14 @@
 
 public static class StringExtension
 {
+    /// <summary>
+    /// Parses string in array of indexes. Delimiter - space. Or can add range with using '-'.
+    /// E.g. 1-5 10 35 - returns 1 2 3 4 5 10 35
+    /// </summary>
+    /// <param name="str">string to process</param>
+    /// <param name="minNumber">minimal number to add</param>
+    /// <param name="maxNumber">maximal number to add</param>
+    /// <returns>return IEnumerable of indexes</returns>
     public static IEnumerable<int> GetIndexes(this string str, int minNumber, int maxNumber)
     {
         List<int> result = new();

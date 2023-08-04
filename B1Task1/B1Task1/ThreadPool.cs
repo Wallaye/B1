@@ -10,17 +10,41 @@ namespace B1Task1;
 
 public static class ThreadPool
 {
+    /// <summary>
+    /// Files to process
+    /// </summary>
     public static int CountFiles = 100;
+    /// <summary>
+    /// Count of threads
+    /// </summary>
     public static int CountThreads = 10;
+    /// <summary>
+    /// Thread array
+    /// </summary>
     private static Thread[]? _threads;
+    /// <summary>
+    /// Stream writer for resulting file
+    /// </summary>
     private static StreamWriter _streamWriter = StreamWriter.Null;
+    /// <summary>
+    /// File stream for resulting file
+    /// </summary>
     private static FileStream? _fileStream;
+    /// <summary>
+    /// Synchronization object
+    /// </summary>
     private static object _sync = new();
-
+    
     public static volatile int ImportedRows = 0;
     public static volatile int AllRows = 0;
     public static long DeletedRows = 0;
 
+    /// <summary>
+    /// Initializing threads in thread pool
+    /// </summary>
+    /// <param name="op">operation to perform</param>
+    /// <param name="substring">substring to delete</param>
+    /// <param name="indexes">indexes of files to import</param>
     public static void InitializeThreads(Operation op = Operation.GenerateFiles, string? substring = null,
         int[]? indexes = null)
     {
@@ -64,6 +88,7 @@ public static class ThreadPool
                 startingIndex = endingIndex + 1;
                 endingIndex = startingIndex + CountFiles / CountThreads - 1;
             }
+            //if last thread then delegate it all of files
             else
             {
                 switch (op)
@@ -90,13 +115,14 @@ public static class ThreadPool
             }
         }
     }
-
+    
     private static void ReadFilesAndDeleteSubstring(int start, int end, string? substring)
     {
         try
         {
             if (_streamWriter == StreamWriter.Null)
             {
+                //Locking streamwriter for single creation
                 lock (_streamWriter)
                 {
                     if (_fileStream == null)
@@ -126,13 +152,14 @@ public static class ThreadPool
     private static void ReadFileAndDeleteSubstring(int index, string? substring)
     {
         string filename = $".\\files\\{index}.txt";
+        //If substring is null then use task for async reading
         Task<string>? getFileContentTask = null;
         var sb = new StringBuilder();
         int deletedRows = 0;
         try
         {
             using var sr = new StreamReader(filename);
-
+            //reading file
             if (!string.IsNullOrWhiteSpace(substring))
             {
                 string? line;
@@ -147,21 +174,21 @@ public static class ThreadPool
                         deletedRows++;
                     }
                 }
-
+                //Atomic update of deleted rows
                 Interlocked.Add(ref DeletedRows, deletedRows);
             }
             else
             {
                 getFileContentTask = sr.ReadToEndAsync();
             }
-
+            
             lock (_streamWriter)
             {
                 if (getFileContentTask != null)
                 {
                     sb.Append(getFileContentTask.GetAwaiter().GetResult());
                 }
-
+                
                 _streamWriter.Write(sb.ToString());
             }
         }
@@ -171,6 +198,9 @@ public static class ThreadPool
         }
     }
 
+    /// <summary>
+    /// Start all threads
+    /// </summary>
     public static void StartAll()
     {
         for (int i = 0; i < _threads?.Length; i++)
@@ -179,7 +209,10 @@ public static class ThreadPool
         }
     }
 
-    public static void WaitAll()
+    /// <summary>
+    /// Wait finishing of all threads and disposing FileStream and StreamWriter
+    /// </summary>
+    public static void WaitAllAndDisposeStreams()
     {
         for (int i = 0; i < _threads?.Length; i++)
         {
@@ -189,6 +222,9 @@ public static class ThreadPool
         DisposeStreams();
     }
 
+    /// <summary>
+    /// Disposing FileStream StreamWriter
+    /// </summary>
     private static void DisposeStreams()
     {
         try
@@ -214,6 +250,9 @@ public static class ThreadPool
         }
     }
 
+    /// <summary>
+    /// Reseting ThreadPool
+    /// </summary>
     public static void Reset()
     {
         _threads = null;
@@ -224,6 +263,10 @@ public static class ThreadPool
         AllRows = 0;
     }
 
+    /// <summary>
+    /// Import files in Database
+    /// </summary>
+    /// <param name="indexes">indexes of files</param>
     public static void ImportFilesInDb(int[] indexes)
     {
         for (int i = 0; i < indexes.Length; i++)
@@ -232,17 +275,23 @@ public static class ThreadPool
         }
     }
 
+    /// <summary>
+    /// import single file
+    /// </summary>
+    /// <param name="index">index of file</param>
     private static void ImportFile(int index)
     {
         string filename = $".\\files\\{index}.txt";
         var reader = new StreamReader(filename);
         int rowsInFile = 0;
+        //Count lines
         while (reader.ReadLine() != null)
         {
             rowsInFile++;
         }
-
+            
         Interlocked.Add(ref AllRows, rowsInFile);
+        //return File pos to the start of file.
         reader.DiscardBufferedData();
         reader.BaseStream.Seek(0, SeekOrigin.Begin);
         string? line;
@@ -252,6 +301,7 @@ public static class ThreadPool
         StringBuilder sb = new();
         while ((line = reader.ReadLine()) != null)
         {
+            //parse string
             var data = line.Split("||");
             DateOnly date = DateOnly.Parse(data[0]);
             string eng = data[1];
@@ -266,8 +316,10 @@ public static class ThreadPool
                 DoubleValue = doubleValue,
                 IntValue = intValue
             };
+            //represent date for SQL query
             var str = $"{table.Date.Year}-{table.Date.Month}-{table.Date.Day}";
 
+            //SQL query
             var sqlQuery =
                 $"INSERT INTO [B1].[dbo].[Tables] (EngString, RusString, [Date], IntValue, DoubleValue) VALUES (" +
                 $"'{table.EngString}', '{table.RusString}', '{str}', {table.IntValue}, {table.DoubleValue.ToString("G", CultureInfo.InvariantCulture)});";
@@ -275,6 +327,7 @@ public static class ThreadPool
             rows++;
             rowsImported++;
 
+            //make 20 inserts at once
             if (rows % 20 == 0)
             {
                 lock (_sync)
@@ -287,6 +340,7 @@ public static class ThreadPool
             }
         }
 
+        //perform inserts of remaining rows
         lock (_sync)
         {
             if (sb.Length != 0)
